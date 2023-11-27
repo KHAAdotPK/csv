@@ -47,3 +47,7 @@ A CSV parser library. It has two dependencies..
     </ItemDefinitionGroup>
  */
 ```
+
+### License
+This project is licensed under a license, the copy of which can be found in file - see the file named LICENSE for details.
+
