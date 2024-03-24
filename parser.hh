@@ -629,6 +629,20 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
           return get_current_token();
       }
 
+	  /*
+   		This method resets certain attributes of the tokenizer object based on the provided parameter.
+   
+   		Parameters:
+       	what - Specifies what aspect of the tokenizer object to reset. Can be either LINES or TOKENS.
+             - LINES: Resets attributes related to lines such as current_line_offset, current_line_size,
+                       current_line_number, and total_number_of_lines.
+             - TOKENS: Resets attributes related to tokens such as current_token_offset, current_token_size,
+                        current_token_number, and total_number_of_tokens.
+   
+   		Note: 
+			When resetting LINES, total_number_of_lines is recalculated by calling get_total_number_of_lines().
+       		Avoid calling this method from within get_total_number_of_lines() to prevent potential issues.
+		*/
       void reset(const int what)
       {
           switch(what)
