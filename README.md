@@ -1,12 +1,59 @@
-** CSV parser **
-
 A CSV parser library. It has two dependencies..
 
 1) github.com/KHAAdotPK/parser.git
 2) github.com/KHAAdotPK/string.git
 
 # Usage...
+```C++
+cc_tokenizer::csv_parser<cc_tokenizer::String<char>, char> parser(text);
+// Iterate through each line of the CSV data
+for (cc_tokenizer::string_character_traits<char>::size_type l = 1; l < parser.get_total_number_of_lines(); l++)
+{
+    /*
+        Traverse each line   
+     */
+    parser.get_line_by_number(l);
 
+    // Iterate through each token on the current line
+    for (cc_tokenizer::string_character_traits<char>::size_type t = 1; t <= parser.get_total_number_of_tokens(); t++)
+    {
+        /*
+            Traverse each token
+         */
+        cc_tokenizer::String<char> theToken = parser.get_token_by_number(t);
+
+        /*
+            This format of while loop is used here so that we still remain on the current line
+         */
+        do {
+            /*
+                While being on the current line, move to the next token 
+                and then from there move to each next token on the current line   
+             */
+            while (parser.go_to_next_token() != cc_tokenizer::string_character_traits<char>::eof())
+            {
+                cc_tokenizer::String<char> token = parser.get_current_token();
+
+                // Process the current token
+
+                if (!theToken.compare(token))
+                {
+                    std::cout<< theToken.c_str() << " -- " << token.c_str() << std::endl;
+                }
+            }
+
+        } while (parser.go_to_next_line() != cc_tokenizer::string_character_traits<char>::eof());
+                
+        // Reset parser to process next line's tokens
+        parser.reset(TOKENS);
+
+        // Retrieve the current line again for the next iteration
+        parser.get_line_by_number(l);
+    }            
+}
+```
+
+# Notes:- Related to compilation...
 ```c++
 /*
     Note: The delimiter used to separate the elements in the COMMAND macro can be customized.
@@ -50,4 +97,5 @@ A CSV parser library. It has two dependencies..
 
 ### License
 This project is governed by a license, the details of which can be located in the accompanying file named 'LICENSE.' Please refer to this file for comprehensive information.
+
 
