@@ -663,7 +663,7 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 		  		  total_number_of_tokens = cc_tokenizer::string_character_traits<char>::int_type(0);
 	      	  break;
 	  	  }
-      }
+      }	  
 };
 };
 #endif  
