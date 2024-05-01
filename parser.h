@@ -14,9 +14,13 @@
 #define		GRAMMAR_END_OF_TOKEN_MARKER_SIZE    1
 #endif
 
+#ifndef GRAMMAR_END_OF_LINE_MARKER    
 /* On a Windows machine it is "\n\r" */
 #define		GRAMMAR_END_OF_LINE_MARKER	"\n"
-#define		GRAMMAR_END_OF_LINE_MARKER_SIZE	1
+#endif
+#ifndef GRAMMAR_END_OF_LINE_MARKER_SIZE    
+#define	GRAMMAR_END_OF_LINE_MARKER_SIZE	1
+#endif
 
 // reset() method, argument values  
 #define   	LINES 				0
