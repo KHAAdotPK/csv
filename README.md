@@ -32,8 +32,8 @@ For example, if you prefer using a space (`' '`) or a multi-character delimiter,
 
 It has two dependencies..
 
-1) (https://github.com/KHAAdotPK/string.git)[https://github.com/KHAAdotPK/parser.git]
-2) (https://github.com/KHAAdotPK/string.git)[https://github.com/KHAAdotPK/string.git]
+1) [https://github.com/KHAAdotPK/parser.git](https://github.com/KHAAdotPK/parser.git)
+2) [https://github.com/KHAAdotPK/string.git](https://github.com/KHAAdotPK/string.git)
 
 Make sure to install these dependencies before using the CSV parser library.
 
