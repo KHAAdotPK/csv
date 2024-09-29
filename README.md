@@ -1,6 +1,11 @@
-** CSV parser **
+### CSV parser
 
 A CSV parser library for C++. This library facilitates the parsing of Comma-Separated Values (CSV) files. It offers customizable delimiters and seamless integration into your C++ projects.
+
+#### Customizing Delimiters
+By default, the CSV parser uses commas (`,`) as delimiters to separate values in the CSV file. However, the delimiter is fully configurable, allowing you to modify it according to your needs. The delimiter can be of any size, thanks to the `GRAMMAR_END_OF_TOKEN_MARKER_SIZE` macro.
+
+For example, if you prefer using a space (`' '`) or a multi-character delimiter, you can adjust both the `GRAMMAR_END_OF_TOKEN_MARKER` and `GRAMMAR_END_OF_TOKEN_MARKER_SIZE` macros to fit your specific requirements.
 
 #### Implementation details...
 ```C++
@@ -27,8 +32,8 @@ A CSV parser library for C++. This library facilitates the parsing of Comma-Sepa
 
 It has two dependencies..
 
-1) github.com/KHAAdotPK/parser.git
-2) github.com/KHAAdotPK/string.git
+1) (https://github.com/KHAAdotPK/string.git)[https://github.com/KHAAdotPK/parser.git]
+2) (https://github.com/KHAAdotPK/string.git)[https://github.com/KHAAdotPK/string.git]
 
 Make sure to install these dependencies before using the CSV parser library.
 
