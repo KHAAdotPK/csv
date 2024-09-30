@@ -1,7 +1,6 @@
 /* src/parser.hh
    Written by, Q@khaa.pk */
 
-#include "../parser/parser.hh" 
 #include "parser.h"
 
 #ifndef		CC_TOKENIZER_CSV_PARSER_HH
@@ -30,6 +29,10 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
    String<char> geotm;
    /* GRAMMAR_END_OF_TOKEN_MARKER_SIZE (Size of the custom end of token marker) */
    String<char>::size_type geotms;
+   /* GRAMMAR_END_OF_LINE_MARKER (Custom end of line marker) */
+   String<char> geolm;
+   /* GRAMMAR_END_OF_LINE_MARKER_SIZE (Size of the custom end of line marker) */
+   String<char> geolms;
 
    // Line related
    typename cc_tokenizer::string_character_traits<char>::int_type current_line_number;
@@ -45,7 +48,7 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
    
    public:
    
-      csv_parser() : str(), geotm(), geotms(0)
+      csv_parser() : str(), geotm(), geotms(0), geolm(), geolms(0)
 	  {
           // Line related
           current_line_number = cc_tokenizer::string_character_traits<char>::int_type(0);
@@ -60,7 +63,7 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 	 	  current_token_size = cc_tokenizer::String<char>::size_type(0);
       }
       
-      csv_parser(String<char>& ref) : str(ref), geotm(), geotms(0)
+      csv_parser(String<char>& ref) : str(ref), geotm(), geotms(0), geolm(), geolms(0) 
 	  {
           // Line related
           current_line_number = cc_tokenizer::string_character_traits<char>::int_type(0);
@@ -79,7 +82,7 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 
 	  // geotm  GRAMMAR_END_OF_TOKEN_MARKER
 	  // geotms GRAMMAR_END_OF_TOKEN_MARKER_SIZE
-	  csv_parser(String<char>& ref, String<char> geotm, String<char>::size_type geotms = 0) : str(ref), geotm(geotm), geotms(geotms)
+	  csv_parser(String<char>& ref, String<char> geotm, String<char>::size_type geotms = 0) : str(ref), geotm(geotm), geotms(geotms), geolm(), geolms(0)
 	  {
 		  //std::cout<<"--> "<<str.c_str()<<" -- "<<geotms<<std::endl;
 
@@ -98,7 +101,7 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 	 	  get_total_number_of_tokens();
 	  }
 	  
-	  csv_parser(const char *ptr) : str(ptr), geotm(), geotms(0)
+	  csv_parser(const char *ptr) : str(ptr), geotm(), geotms(0), geolm(), geolms(0)
 	  {
 		  // Line related
           current_line_number = cc_tokenizer::string_character_traits<char>::int_type(0);
@@ -268,39 +271,108 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 	    		
               while (go_to_next_line() != cc_tokenizer::string_character_traits<char>::eof())			  
 			  {				  
-				  total_number_of_lines = total_number_of_lines + cc_tokenizer::string_character_traits<char>::int_type(1);				  
+				  total_number_of_lines = total_number_of_lines + cc_tokenizer::string_character_traits<char>::int_type(1);	
+
+				  //std::cout<< "-> " << total_number_of_lines << std::endl;			  				  
               }
             
               current_line_number = cln;
               current_line_offset = clo;
               current_line_size = cls;
-          }
-         
+          }         		 	
+		  	
           return total_number_of_lines;
       }
 
       cc_tokenizer::string_character_traits<char>::int_type go_to_next_line(void) 
-      {
+      {		 
     	  cc_tokenizer::string_character_traits<char>::int_type ret = cc_tokenizer::string_character_traits<char>::eof();
 
-	 	  typename cc_tokenizer::String<char>::size_type pos_begin = str.find(GRAMMAR_END_OF_LINE_MARKER, current_line_offset + current_line_size);
+		  if ((current_line_offset + current_line_size) >= str.size())
+		  {			  
+			  return ret;
+		  }
 
+		  //std::cout<< "current_line_offset + current_line_size = " << current_line_offset + current_line_size << "," << str.size() << std::endl;
+
+		  // Local "grammar end of token marker"	
+		  cc_tokenizer::String<char> geolm_l;
+
+		  if (geolm.size()) 
+		  {			  
+			   geolm_l = geolm;			  
+		  }
+		  else 
+		  {				
+			   geolm_l = cc_tokenizer::String<char>(GRAMMAR_END_OF_LINE_MARKER_SIZE, GRAMMAR_END_OF_LINE_MARKER);
+		  } 
+
+	 	  typename cc_tokenizer::String<char>::size_type pos_begin = str.find(/*GRAMMAR_END_OF_LINE_MARKER*/ geolm_l, current_line_offset + current_line_size);
+		  		  		   
 		  // End of line marker found		
 	 	  if (pos_begin != cc_tokenizer::String<char>::npos) 
-	 	  {
-	    	  current_line_offset = current_line_offset + current_line_size;
+	 	  {				   				  
+	    	  current_line_offset = current_line_offset + current_line_size /*+ geolm_l.size()*/;
+
+			  /*
+			  		Take into consideration the leading end of token marker/s
+					---------------------------------------------------------  
+			   */
+			  // Local "grammar end of token marker"	
+		 	  /*cc_tokenizer::String<char> geotm_l;
+
+		  	  if (geotm.size()) 
+		      {			  
+			  	  geotm_l = geotm;			  
+		  	  }
+		  	  else 
+		  	  {				
+				  geotm_l = cc_tokenizer::String<char>(GRAMMAR_END_OF_LINE_MARKER);
+		  	  } */	
+			  /* I just died here */
+
+			  //current_line_offset = current_line_offset + geolm_l.size();
+
+			  //bool flag = true;	
+			  //while (flag)
+			  {
+				  /*if (str.data()[current_line_offset] == ' ')
+				  {
+					 current_line_offset =  current_line_offset + 1; 
+				  }
+				  else 
+				  {
+					  break;
+				  }*/
+				  /*for (cc_tokenizer::string_character_traits<char>::size_type i = 0; i < geotm_l.size(); i++)
+				  {
+					  if (str.data()[current_line_offset + i] != geotm_l.data()[i])
+				  	  {
+							flag = false;
+							break;
+					  }
+
+					  current_line_offset =  current_line_offset + 1; 				  	  
+				  }*/
+			  }
+			  /*
+			  		Took into consideration the leading end of token marker/s
+					---------------------------------------------------------  
+			   */
 
 			  //#ifdef _WIN32
 	    	  //current_line_size = (pos_begin - current_line_offset) + 1; // \n\r
 			  //#else
-			  current_line_size = (pos_begin - current_line_offset) + GRAMMAR_END_OF_LINE_MARKER_SIZE; // \n	
+			  current_line_size = (pos_begin - current_line_offset) /*+*/ /*GRAMMAR_END_OF_LINE_MARKER_SIZE*/ + geolm_l.size(); // \n	
 			  //#endif
 			  
+			  //std::cout<< "current_line_size = " << current_line_size << std::endl;
+			  			  
 			  /* 
 		  	 	Line size atleast equals to the size of GRAMMAR_END_OF_LINE_MARKER_SIZE, token atleast has the GRAMMAR_END_OF_LINE_MARKER
 		     	End result is that before using the token, check its size aka get_current_line().size()
 		   	   */	
-			  if (current_line_size > GRAMMAR_END_OF_LINE_MARKER_SIZE)
+			  if (current_line_size > /*GRAMMAR_END_OF_LINE_MARKER_SIZE*/ geolm_l.size())
 			  {						  
 	    	  	  current_line_number = current_line_number + 1;
 			  }
@@ -308,26 +380,33 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 	    	  reset(TOKENS);
 
 			  get_total_number_of_tokens();
-			  			  
+
+			  //std::cout<< "current_line_size = " << current_line_size << std::endl;
+			  			  			  
 	    	  ret = ~ret;
 	 	  }
 		  // End of line marker was not found 		  
 		  else
-		  {	
+		  {			  
 			  if ((str.size() - (current_line_offset + current_line_size)) > 0)
 			  {	
 				  current_line_offset = current_line_offset + current_line_size;
-				  current_line_size = str.size() - current_line_offset;
+				  current_line_size = str.size() - current_line_offset /* Zero originated */;
 				  current_line_number = current_line_number + 1;
+
+				  //std::cout<< str.substr(current_line_offset, current_line_size).c_str();
+
+				  //std::cout<< "current_line_size = " << current_line_size << std::endl;
 				  
 				  reset(TOKENS);
 
 				  get_total_number_of_tokens();
 
-			  	  ret = ~ret;
-		      }  
+			  	  ret = ~ret;				  
+		      }
 		  }
-		  
+
+		  //std::cout<< str.substr(current_line_offset, current_line_size).c_str();
 		  
 	 	  return ret;
       }
@@ -380,7 +459,7 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
             }
             
             /* We found a new line, remove the comment part of this line(if it has that part too) */    
-            cc_tokenizer::String<char>::size_type cmt_byte_offset = cc_tokenizer::String<char>(str.data() + current_line_offset, current_line_size).find(GRAMMAR_START_OF_COMMENT);
+            cc_tokenizer::String<char>::size_type cmt_byte_offset = cc_tokenizer::String<char>(str.data() + current_line_offset, current_line_size).find(GRAMMAR_START_OF_COMMENT_MARKER);
           
             if ( cmt_byte_offset != cc_tokenizer::String<char>::npos ) {
            
@@ -403,34 +482,257 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
          return ret;
       }
 
-      cc_tokenizer::string_character_traits<char>::int_type go_to_next_token(void)
+	  cc_tokenizer::string_character_traits<char>::int_type go_to_next_token(void)
       {
+		  cc_tokenizer::string_character_traits<char>::int_type ret = cc_tokenizer::string_character_traits<char>::eof();
+
+		  if ((current_token_offset + current_token_size) >= get_current_line().size())
+		  {
+			  return ret;
+		  }
+		  		  
+		  // Local "grammar end of token marker"	
+		  cc_tokenizer::String<char> geotm_l;
+
+		  if (geotm.size()) 
+		  {			  
+			  geotm_l = geotm;			  
+		  }
+		  else 
+		  {				
+			  geotm_l = cc_tokenizer::String<char>(GRAMMAR_END_OF_TOKEN_MARKER_SIZE, GRAMMAR_END_OF_TOKEN_MARKER);
+		  }
+
+		  // Find the end of token marker, the GRAMMAR_END_OF_TOKEN_MARKER	
+	  	  typename cc_tokenizer::String<char>::size_type pos = get_current_line().find(geotm_l, current_token_offset + current_token_size);
+
+		  // Number of "end of token markers"
+		  cc_tokenizer::string_character_traits<char>::size_type n_eotm	= 0;
+
+		  if (pos != cc_tokenizer::String<char>::npos)
+		  {
+			  n_eotm = 1;
+
+			  // Look for contiguios markers, marker (we are here)marker token 	
+			  while (1) 
+			  {
+				  bool flag = false;
+
+				  //std::cout<< "pos + geotm_l.size()*n_eotm) + (geotm_l.size() = " << pos + geotm_l.size()*n_eotm + geotm_l.size() << std::endl;
+
+				  //std::cout<< "pos = " << pos + geotm_l.size()*n_eotm + (geotm_l.size()/*The next "end of token marker"*/ - 1)<< std::endl;
+
+				  if (((pos + geotm_l.size()*n_eotm) + (geotm_l.size()/*The next "end of token marker"*/ - 1)) < get_current_line().size())
+			  	  {
+					  for (cc_tokenizer::string_character_traits<char>::size_type i = 0; i < geotm_l.size(); i++)
+					  {
+						  if (get_current_line()[(pos + geotm_l.size()*n_eotm) + i] != geotm_l[i])						  
+						  {							  
+							  flag = true;
+							  break;							
+						  }
+					  }
+				  }
+				  else
+				  {
+					  break;
+				  }
+
+				  if (flag == true)
+				  {
+					  break;
+				  }
+
+				  n_eotm = n_eotm + 1;			  
+			  }
+
+			  if ((current_token_offset + current_token_size) == 0)
+			  {
+				  current_token_offset = 0;
+				  current_token_size = pos;
+			  }
+			  else
+			  {
+				  current_token_offset = pos + n_eotm*geotm_l.size() /*current_token_offset + current_token_size + n_eotm*geotm_l.size()*/;
+				  typename cc_tokenizer::String<char>::size_type pos_l = get_current_line().find(geotm_l, pos + n_eotm*geotm_l.size());
+				  if (pos_l != cc_tokenizer::String<char>::npos)
+				  {
+					  current_token_size = pos_l - (pos + n_eotm*geotm_l.size());
+				  }
+				  else
+				  {
+					  /*
+					  	 The last line of the file should be empty, otherwise the last token may include garbage
+					   */
+					  current_token_size = get_current_line().size() - (pos + n_eotm*geotm_l.size());
+				  }					  
+			  }
+			  
+			  /*if (current_token_size == 0)
+			  {
+				 if (current_token_offset == 0)
+				 {
+					 current_token_size = pos;
+				 }
+				 else
+				 {*/
+					// Find the end of token marker, the GRAMMAR_END_OF_TOKEN_MARKER	
+	  	  			/*typename*/ //cc_tokenizer::String<char>::size_type pos_l = get_current_line().find(geotm_l, pos + n_eotm*geotm_l.size());
+					/*if (pos_l != cc_tokenizer::String<char>::npos)
+					{
+						current_token_size = pos_l - (pos + n_eotm*geotm_l.size());
+					}
+					else
+					{
+						current_token_size = get_current_line().size() - (pos + n_eotm*geotm_l.size());
+					}									 
+			  	 }
+			  }*/
+
+			  //current_token_number = current_token_number + 1;
+
+			  ret = ~ret;
+
+			  //cc_tokenizer::String<char> obj(get_current_line().data() + current_token_offset /*+ current_token_size*/, current_token_size);
+		  	  //std::cout<<obj.c_str()<<std::endl;
+
+			  //if (obj.compare("programmer") == 0)
+			  //{
+			  //	  exit(1);
+			  //}	
+		  }
+		  else
+		  {	
+			  /*
+			  		The following code block can only be reached when a line has only one token
+					and that token is not delimited by an endof token marker/s.
+
+					If last line is not empty...
+					Then last token of such line would have trailing garbage characters.
+
+					If last line is empty...
+					Then calling get_current_token() would result in a garbage token.					
+			   */		  
+			  //pos = get_current_line().size();
+			  //std::cout<< "pos = " << pos << std::endl;
+			  current_token_offset = current_token_offset + current_token_size;	
+			  current_token_size = get_current_line().size() - (n_eotm*geotm_l.size()) - current_token_offset;
+
+			  //cc_tokenizer::String<char> obj(get_current_line().data() + current_token_offset /*+ current_token_size*/, current_token_size);
+
+			  /* if (current_token_size)
+			  {
+				  std::cout<< "--> " << obj.c_str()<<std::endl;
+				  //std::cout<< get_current_line().c_str() << std::endl;
+			  }*/
+		  	  //std::cout<< "--> " << obj.c_str()<<std::endl;			  
+
+			  //current_token_number = current_token_number + 1;	
+
+			  ret = ~ret;	
+
+			  //std::cout<< "****REACHED...." << std::endl;			  
+		  }
+		  	
+		  //cc_tokenizer::String<char> obj(get_current_line().data() + current_token_offset /*+ current_token_size*/, current_token_size);
+		  //std::cout<< "size = " << obj.size() << " --> " << obj.c_str() << std::endl;
+		
+		  current_token_number = current_token_number + 1;	
+
+		  return ret;
+	  }
+
+      cc_tokenizer::string_character_traits<char>::int_type go_to_next_token_new_but_old(void)
+      {		 
           cc_tokenizer::string_character_traits<char>::int_type ret = cc_tokenizer::string_character_traits<char>::eof();
+		  // Local "grammar end of token marker"	
+		  cc_tokenizer::String<char> geotm_l;
 
 		  // Find the end of token marker, the GRAMMAR_END_OF_TOKEN_MARKER	
 	  	  typename cc_tokenizer::String<char>::size_type pos = 0;
-
+		  
 		  if (geotm.size()) 
-		  {
-			  //std::cout<<get_current_line().c_str()<<std::endl;
-			  pos = get_current_line().find(geotm, current_token_offset + current_token_size);
+		  {			  
+			  geotm_l = geotm;
+			  //pos = get_current_line().find(geotm, current_token_offset + current_token_size);
 		  }
 		  else 
-		  {		
-			  pos = get_current_line().find(GRAMMAR_END_OF_TOKEN_MARKER, current_token_offset + current_token_size);
+		  {				
+			  geotm_l = cc_tokenizer::String<char>(GRAMMAR_END_OF_TOKEN_MARKER);
+			  //pos = get_current_line().find(GRAMMAR_END_OF_TOKEN_MARKER, current_token_offset + current_token_size);			  
 		  }
 
-		  	
-          // Because the last token does'nt have the GRAMMAR_END_OF_TOKEN_MARKER
-          if (pos == cc_tokenizer::String<char>::npos)
+		  //std::cout<<"Size of geotm_l = " << geotm_l.size() << "is ->" << geotm_l.c_str() << "<-"<< std::endl;
+
+		  //pos = get_current_line().find(geotm_l, (current_token_offset + current_token_size) == 0 || current_token_offset == 0 ? current_token_offset + current_token_size : current_token_offset + current_token_size + geotm_l.size());
+		  pos = get_current_line().find(geotm_l, current_token_offset + current_token_size);
+		  		  
+		  // Number of "end of token markers", atleast one is always there explicitly otherwise it is implied
+		  cc_tokenizer::string_character_traits<char>::size_type n_eotm = 1;
+		  
+		  // To locate contigous "end of token markers" one after the other	
+		  if (pos != cc_tokenizer::String<char>::npos)
+		  {
+			  // "End of token size"
+			  /*cc_tokenizer::string_character_traits<char>::size_type eots = GRAMMAR_END_OF_TOKEN_MARKER_SIZE;
+
+			  if (geotm.size())
+			  {
+				  eots = geotm.size();				  
+			  }*/
+			  
+			  // Already found one, move position beyond the end of the found marker
+			  //pos = pos + geotm_l.size() /*eots*/; 
+
+			  //std::cout<< "pos = " << pos << std::endl;
+			  
+			  // Look for contiguios markers, marker (we are here)marker token 	
+			  while (1) 
+			  {
+				  bool flag = false;
+
+				  if ((pos + geotm_l.size())/*eots*/ + (geotm_l.size() - 1) /*The next "end of token marker"*/ < get_current_line().size())
+			  	  {
+					  std::cout<< "(pos + geotm_l.size()) + geotm_l.size() - 1 = " << (pos + geotm_l.size()) + geotm_l.size() - 1 << ", get_current_line().size() = "	<< get_current_line().size() << std::endl;
+
+				      for (cc_tokenizer::string_character_traits<char>::size_type i = 0; i < geotm_l.size() /*eots*/; i++)
+					  {
+						  if (get_current_line()[(pos + geotm_l.size()) + i] != geotm_l[i])
+						  //if (get_current_line().c_str()[pos + i] != geotm.c_str()[i])					  
+						  {							  
+							  flag = true;
+							  break;							
+						  }
+					  }					  
+				  }
+				  else
+				  {
+					  break;
+				  }
+				
+				  if (flag == true)
+				  {
+					  break;
+				  }
+
+				  pos = pos + geotm_l.size() /*eots*/;	// marker marker (we are here)token 
+
+				  n_eotm = n_eotm + 1;				  
+			  }
+		  }		  	
+          // Because the last token does'nt have the GRAMMAR_END_OF_TOKEN_MARKER/s          
+		  else
 	  	  {
 	      	  pos = get_current_line().size();	
+
+			  //std::cout<< "At the end of line...   ";	 
 				
 	      	  /*if (pos)
 	      	  {
 	          	  current_token_number = current_token_number + 1;
 	      	  }*/
-	  	  }
+	  	  }	
+		  
 	  	  /*else 
 	  	  {
 	      	  current_token_number = current_token_number + 1;
@@ -438,25 +740,34 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 		  //else if ()
 		  //std::cout<<get_current_line().data() + current_token_offset + current_token_size<<std::endl;
 
-	  	  current_token_offset = current_token_offset + current_token_size;
-		  if (geotm.size())
+	  	  //current_token_offset = current_token_offset + current_token_size;		  
+		  /*if (geotm.size())
 		  {
-			  current_token_size = pos - current_token_offset + geotm.size();
+			  current_token_offset = current_token_offset + current_token_size + geotm.size()*n_eotm;
+			  current_token_size = pos - current_token_offset;
 			  //cc_tokenizer::String<char> obj(get_current_line().data() + current_token_offset + current_token_size, current_token_size);
 		  }	
 		  else
-		  {				  		  	
-	  	  	   current_token_size = pos - current_token_offset + GRAMMAR_END_OF_TOKEN_MARKER_SIZE;
-		  }
+		  {	
+			   current_token_offset = current_token_offset + current_token_size + GRAMMAR_END_OF_TOKEN_MARKER_SIZE*n_eotm;			  		  	
+	  	  	   current_token_size = pos - current_token_offset;
+		  }*/
+
+		  current_token_offset = current_token_offset + current_token_size + geotm_l.size()/**(n_eotm - 1)*/;		  
+		  current_token_size = (pos /*- geotm_l.size()*/) - current_token_offset;
+
+		  std::cout<< "current_token_offset = " << current_token_offset << ", current_token_size = " << current_token_size << std::endl;
 
 		  /*
 		  	//////////////////////////////////////////////////////////////////////
 			// NOTE:- USE THIS COMMENTED CODE BLOCK TO DEBUG INDIVIDUAL TOKENS //
 			/////////////////////////////////////////////////////////////////////
+		  */
+		  /*	
 		  cc_tokenizer::String<char> obj(get_current_line().data() + current_token_offset + current_token_size, current_token_size);
 		  std::cout<<obj.c_str()<<std::endl;
 		   */
-
+		   
 		  /* 
 		  	 Token size atleast equals to the size of GRAMMAR_END_OF_TOKEN_MARKER_SIZE, token atleast has the GRAMMAR_END_OF_TOKEN_MARKER
 		     End result is that before using the token, check its size aka get_current_token().size()
@@ -489,16 +800,39 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 		  if (!geotm.size())
 		  {
 		  // Returned token does not include the GRAMMR_END_OF_TOKEN_MARKER
-          	  return cc_tokenizer::String<char>(get_current_line().data() + current_token_offset, current_token_size - GRAMMAR_END_OF_TOKEN_MARKER_SIZE);
+          	  return cc_tokenizer::String<char>(get_current_line().data() + current_token_offset, current_token_size /*- GRAMMAR_END_OF_TOKEN_MARKER_SIZE*/);
 		  }
 		  else
 		  {
-			  return cc_tokenizer::String<char>(get_current_line().data() + current_token_offset, current_token_size - geotm.size());
+			  return cc_tokenizer::String<char>(get_current_line().data() + current_token_offset, current_token_size /*- geotm.size()*/);
 		  }
 		  
       }
 
-      cc_tokenizer::string_character_traits<char>::int_type get_total_number_of_tokens(void)
+	  cc_tokenizer::string_character_traits<char>::int_type get_total_number_of_tokens(void)
+      {
+		  if (get_current_line().size())
+	  	  {
+	      	  cc_tokenizer::string_character_traits<char>::int_type ctn = current_token_number;
+	      	  cc_tokenizer::string_character_traits<char>::size_type cto = current_token_offset;
+	      	  cc_tokenizer::string_character_traits<char>::size_type cts = current_token_size;
+
+          	  reset(TOKENS); // It will also reset the total_number_of_tokens
+
+			  while (go_to_next_token() != cc_tokenizer::string_character_traits<char>::eof())
+			  {
+				  total_number_of_tokens = total_number_of_tokens + 1;
+			  }	
+
+			  current_token_number = ctn;
+	      	  current_token_offset = cto;
+	      	  current_token_size = cts;	
+		  }
+
+		  return total_number_of_tokens;
+	  }
+
+      cc_tokenizer::string_character_traits<char>::int_type get_total_number_of_tokens_old(void)
       {
           if (get_current_line().size())
 	  	  {
@@ -529,7 +863,7 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 	      	  current_token_offset = cto;
 	      	  current_token_size = cts;
 	  	  }
-
+		  		
 	  	  return total_number_of_tokens; 
       }
       
