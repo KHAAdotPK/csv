@@ -123,6 +123,16 @@ for (cc_tokenizer::string_character_traits<char>::size_type l = 1; l < parser.ge
 }
 ```
 
+#### Controlling Parser Behavior with File Formatting
+There is currently a known bug in the CSV parser where, if the input file does not have an empty line at the end, the parser may mistakenly read and process an additional line. This issue can be avoided by ensuring that the CSV file is properly formatted.
+
+To avoid encountering this issue, follow these guidelines:
+
+- Ensure that the last line of the CSV file is **empty**.
+- The cursor should be positioned at the very **start of the empty line**.
+
+This file formatting is a temporary workaround to avoid this issue.
+
 ### License
 This project is governed by a license, the details of which can be located in the accompanying file named 'LICENSE.' Please refer to this file for comprehensive information.
 
