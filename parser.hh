@@ -289,7 +289,11 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
     	  cc_tokenizer::string_character_traits<char>::int_type ret = cc_tokenizer::string_character_traits<char>::eof();
 
 		  if ((current_line_offset + current_line_size) >= str.size())
-		  {			  
+		  {	
+			  if (total_number_of_lines > 1)
+			  {
+				  total_number_of_lines = total_number_of_lines - 1;
+			  }			  
 			  return ret;
 		  }
 
@@ -363,7 +367,7 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 			  //#ifdef _WIN32
 	    	  //current_line_size = (pos_begin - current_line_offset) + 1; // \n\r
 			  //#else
-			  current_line_size = (pos_begin - current_line_offset) /*+*/ /*GRAMMAR_END_OF_LINE_MARKER_SIZE*/ + geolm_l.size(); // \n	
+			  current_line_size = (pos_begin - current_line_offset)  /*+*/ /*GRAMMAR_END_OF_LINE_MARKER_SIZE*/ + geolm_l.size(); // \n	
 			  //#endif
 			  
 			  //std::cout<< "current_line_size = " << current_line_size << std::endl;
@@ -387,55 +391,23 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 	 	  }
 		  // End of line marker was not found 		  
 		  else
-		  {		
-			   current_line_offset = current_line_offset + current_line_size;
-			   current_line_size = str.size() - current_line_offset; //Zero originated
-			   current_line_number = current_line_number + 1;
-
-			   get_total_number_of_tokens();
-
-			   //ret = ~ret;
-
-			   /*if (current_line_size > geolm_l.size() && tot_n_t <= 1)
-			   {
-					current_line_number = current_line_number - 1;
-			   }
-			   else 
-			   {	
-			  	   ret = ~ret;
-			   }*/
-
-			  //std::cout<< "current_line_size = " << current_line_size << ", and tnt = " << tot_n_t << std::endl;
-
-			  /*	  
+		  {			  
 			  if ((str.size() - (current_line_offset + current_line_size)) > 0)
 			  {	
 				  current_line_offset = current_line_offset + current_line_size;
-				  current_line_size = str.size() - current_line_offset ; //Zero originated
+				  current_line_size = str.size() - current_line_offset /* Zero originated */;
 				  current_line_number = current_line_number + 1;
 
-				  		//std::cout<< str.substr(current_line_offset, current_line_size).c_str();
+				  //std::cout<< str.substr(current_line_offset, current_line_size).c_str();
 
-				  		//std::cout<< "current_line_size = " << current_line_size << std::endl;
+				  //std::cout<< "current_line_size = " << current_line_size << std::endl;
 				  
 				  reset(TOKENS);
 
-				  cc_tokenizer::string_character_traits<char>::size_type tot_n_t = get_total_number_of_tokens();
+				  get_total_number_of_tokens();
 
-				  		//std::cout<< "------->? " << current_line_size << " - " << str.size()  - (current_line_offset + current_line_size)<< std::endl;
-				  		//std::cout<< get_total_number_of_tokens() << std::endl;
-
-				  if (current_line_size > geolm_l.size() && tot_n_t <= 1)
-				  {
-					  current_line_number = current_line_number - 1;
-				  }
-				  else 
-				  {	
-			  	  	ret = ~ret;
-				  }
+			  	  ret = ~ret;				  
 		      }
-			   */
-			   
 		  }
 
 		  //std::cout<< str.substr(current_line_offset, current_line_size).c_str();
@@ -519,9 +491,10 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 		  cc_tokenizer::string_character_traits<char>::int_type ret = cc_tokenizer::string_character_traits<char>::eof();
 
 		  if ((current_token_offset + current_token_size) >= get_current_line().size())
-		  {				
+		  {
 			  if (total_number_of_tokens > 1)
 			  {
+				  //current_token_number = current_token_number - 1;
 				  total_number_of_tokens = total_number_of_tokens - 1;
 			  }
 			  return ret;
@@ -673,8 +646,6 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 		  //cc_tokenizer::String<char> obj(get_current_line().data() + current_token_offset /*+ current_token_size*/, current_token_size);
 		  //std::cout<< "size = " << obj.size() << " --> " << obj.c_str() << std::endl;
 		
-		  //std::cout<< " ------> " << current_token_size << std::endl;	
-
 		  current_token_number = current_token_number + 1;	
 
 		  return ret;
