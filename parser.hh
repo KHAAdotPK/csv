@@ -290,10 +290,10 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 
 		  if ((current_line_offset + current_line_size) >= str.size())
 		  {	
-			  if (total_number_of_lines > 1)
+			  /*if (total_number_of_lines > 1)
 			  {
 				  total_number_of_lines = total_number_of_lines - 1;
-			  }			  
+			  }*/			  
 			  return ret;
 		  }
 
