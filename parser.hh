@@ -492,11 +492,11 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 
 		  if ((current_token_offset + current_token_size) >= get_current_line().size())
 		  {
-			  if (total_number_of_tokens > 1)
+			  /*if (total_number_of_tokens > 1)
 			  {
 				  //current_token_number = current_token_number - 1;
 				  total_number_of_tokens = total_number_of_tokens - 1;
-			  }
+			  }*/
 			  return ret;
 		  }
 		  		  
