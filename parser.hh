@@ -288,14 +288,14 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
       {		 
     	  cc_tokenizer::string_character_traits<char>::int_type ret = cc_tokenizer::string_character_traits<char>::eof();
 
-		  if ((current_line_offset + current_line_size) >= str.size())
+		  /*if ((current_line_offset + current_line_size) >= str.size())
 		  {	
-			  /*if (total_number_of_lines > 1)
+			  if (total_number_of_lines > 1)
 			  {
 				  total_number_of_lines = total_number_of_lines - 1;
-			  }*/			  
+			  }
 			  return ret;
-		  }
+		  }*/
 
 		  //std::cout<< "current_line_offset + current_line_size = " << current_line_offset + current_line_size << "," << str.size() << std::endl;
 
@@ -390,12 +390,12 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 	    	  ret = ~ret;
 	 	  }
 		  // End of line marker was not found 		  
-		  else
-		  {			  
+		  /*else
+		  {				  			  
 			  if ((str.size() - (current_line_offset + current_line_size)) > 0)
 			  {	
 				  current_line_offset = current_line_offset + current_line_size;
-				  current_line_size = str.size() - current_line_offset /* Zero originated */;
+				  current_line_size = str.size() - current_line_offset/ // Zero originated
 				  current_line_number = current_line_number + 1;
 
 				  //std::cout<< str.substr(current_line_offset, current_line_size).c_str();
@@ -407,8 +407,9 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 				  get_total_number_of_tokens();
 
 			  	  ret = ~ret;				  
-		      }
-		  }
+		      }			   
+		  } 
+		   */
 
 		  //std::cout<< str.substr(current_line_offset, current_line_size).c_str();
 		  
@@ -492,7 +493,7 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 
 		  if ((current_token_offset + current_token_size) >= get_current_line().size())
 		  {
-			  /*if (total_number_of_tokens > 1)
+			  /*if (total_number_of_tokens > 0)
 			  {
 				  //current_token_number = current_token_number - 1;
 				  total_number_of_tokens = total_number_of_tokens - 1;
@@ -624,9 +625,10 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 			   */		  
 			  //pos = get_current_line().size();
 			  //std::cout<< "pos = " << pos << std::endl;
+			  	
 			  current_token_offset = current_token_offset + current_token_size;	
 			  current_token_size = get_current_line().size() - (n_eotm*geotm_l.size()) - current_token_offset;
-
+				
 			  //cc_tokenizer::String<char> obj(get_current_line().data() + current_token_offset /*+ current_token_size*/, current_token_size);
 
 			  /* if (current_token_size)
@@ -637,9 +639,9 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 		  	  //std::cout<< "--> " << obj.c_str()<<std::endl;			  
 
 			  //current_token_number = current_token_number + 1;	
-
+					
 			  ret = ~ret;	
-
+					
 			  //std::cout<< "****REACHED...." << std::endl;			  
 		  }
 		  	
