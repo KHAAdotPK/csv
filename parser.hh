@@ -973,6 +973,135 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 
           return get_current_token();
       }
+	  
+	  /**
+ 	   * @brief Computes the maximum number of tokens in any single line/batch within the corpus/vocabulary.
+ 	   * 
+ 	   * This method scans through the corpus, identifying individual batches based on a 
+ 	   * predefined batch-ending marker. Each batch is then tokenized using a separate 
+ 	   * token-ending marker. The function determines the maximum number of tokens found 
+ 	   * in any single batch of the corpus.
+ 	   * 
+ 	   * @return The length of the longest tokenized sequence (in terms of token count).
+ 	   * 
+ 	   * @note This function assumes that corpus contains multiple batche, 
+ 	   *       each ending with a specific marker, and each token is separated 
+ 	   *       by another marker. The efficiency of this method depends on 
+ 	   *       the size of the batch and the frequency of markers.
+ 	   */
+	  cc_tokenizer::string_character_traits<char>::size_type max_sequence_length(void)
+	  {	
+		  cc_tokenizer::string_character_traits<char>::size_type ret = 0;
+		  
+		  if (!str.size())
+		  {
+		 	  return ret;
+          } 
+		  		  
+		  //current_line_offset = current_line_offset + current_line_size /*+ geolm_l.size()*/;
+		  
+		  cc_tokenizer::string_character_traits<char>::size_type clo  = 0 /*current line offset*/, cls = 0 /* current line size */;
+		  
+		  // Local grammar end of line marker, Local grammar end of token marker
+		  cc_tokenizer::String<char> geolm_l, geotm_l;
+
+		  if (geolm.size()) 
+		  {			  
+			   geolm_l = geolm;			  
+		  }
+		  else 
+		  {				
+			   geolm_l = cc_tokenizer::String<char>(GRAMMAR_END_OF_LINE_MARKER_SIZE, GRAMMAR_END_OF_LINE_MARKER);
+		  } 
+
+		  if (geotm.size())
+		  {
+			  geotm_l = geotm;
+		  }
+		  else
+		  {
+			  geotm_l = cc_tokenizer::String<char>(GRAMMAR_END_OF_TOKEN_MARKER_SIZE, GRAMMAR_END_OF_TOKEN_MARKER);
+		  }
+
+	 	  typename cc_tokenizer::String<char>::size_type pos_begin;
+
+		  while (1)
+		  {				
+				pos_begin = str.find(geolm_l, clo);
+
+				if (pos_begin == cc_tokenizer::String<char>::npos)
+				{
+					break;
+				}
+
+				/*for (int i = 0; i < (pos_begin - clo); i++)
+				{
+					std::cout<< str.data()[clo + i];
+				}*/
+
+				/*std::cout<< std::endl;*/
+
+				cc_tokenizer::String<char> line(str.c_str() + clo, pos_begin + geolm_l.size() - clo);
+																
+				cls = pos_begin + geolm_l.size() - clo;																
+				clo = clo + cls;
+												
+				cc_tokenizer::string_character_traits<char>::size_type cto = 0 /* current token offset */, cts = 0 /* current token size */;
+				cc_tokenizer::string_character_traits<char>::size_type tpl = 0 /* tokens per line */;
+
+				while (1)
+				{
+					pos_begin = line.find(geotm_l, cto);
+
+					/*
+						The last token does not end on token-terminating symbol.
+						We are sure that each batch ends on batch-terminating symbol.						
+					 */
+					/**
+ 					 * @brief Handles cases where the last token in a batch does not end with a token-terminating symbol.
+ 					 * 
+ 					 * This block checks whether the token-ending marker (`geotm_l`) exists in the current line. 
+ 					 * If not found (`npos`), it means the last token does not have an explicit termination marker. 
+ 					 * 
+ 					 * Since each batch is guaranteed to end with a batch-terminating symbol, we ensure that 
+ 					 * any remaining non-empty portion of the batch (excluding the line-ending marker) is counted 
+ 					 * as a valid token.
+ 					 * 
+ 					 * @note This logic ensures that the function correctly counts the last token in each line, 
+ 					 *       even if it lacks a token-terminating marker.
+ 					 */
+					if (pos_begin == cc_tokenizer::String<char>::npos)
+					{
+						if ((line.size() - (cto + geolm_l.size())) > 0)
+						{
+							tpl = tpl + 1;
+						}
+						
+						break;
+					}
+
+					tpl = tpl + 1;
+					/*for (int i = 0; i < (pos_begin - cto); i++)
+					{
+						std::cout<< line.data()[cto + i];
+					}*/
+
+					/*std::cout<< " ";*/
+
+					cts = pos_begin + geotm_l.size() - cto;																
+					cto = cto + cts;
+				}
+
+				if (ret < tpl)
+				{
+					ret = tpl;
+				}
+				
+				/*std::cout<< std::endl;*/
+		  }
+				  		  
+		  return ret;
+	  }
 
 	  /*
    		This method resets certain attributes of the tokenizer object based on the provided parameter.
