@@ -510,7 +510,8 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 		  }
 		  else 
 		  {				
-			  geotm_l = cc_tokenizer::String<char>(GRAMMAR_END_OF_TOKEN_MARKER_SIZE, GRAMMAR_END_OF_TOKEN_MARKER);
+			  geotm_l = cc_tokenizer::String<char>{GRAMMAR_END_OF_TOKEN_MARKER/*, GRAMMAR_END_OF_TOKEN_MARKER_SIZE*/} /*cc_tokenizer::String<char>(GRAMMAR_END_OF_TOKEN_MARKER_SIZE, (char)GRAMMAR_END_OF_TOKEN_MARKER)*/ ;
+			 
 		  }
 
 		  // Find the end of token marker, the GRAMMAR_END_OF_TOKEN_MARKER	
@@ -1020,7 +1021,7 @@ class csv_parser<cc_tokenizer::String<char>, char> : public cc_tokenizer::parser
 		  }
 		  else
 		  {
-			  geotm_l = cc_tokenizer::String<char>(GRAMMAR_END_OF_TOKEN_MARKER_SIZE, GRAMMAR_END_OF_TOKEN_MARKER);
+			  geotm_l = cc_tokenizer::String<char>{GRAMMAR_END_OF_TOKEN_MARKER, /*GRAMMAR_END_OF_LINE_MARKER_SIZE*/} /*cc_tokenizer::String<char>{GRAMMAR_END_OF_TOKEN_MARKER_SIZE, GRAMMAR_END_OF_TOKEN_MARKER}*/;
 		  }
 
 	 	  typename cc_tokenizer::String<char>::size_type pos_begin;
