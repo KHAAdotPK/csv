@@ -12,7 +12,7 @@
     This is temporary replace white space with ,
  */
 #ifndef GRAMMAR_END_OF_TOKEN_MARKER
-#define	GRAMMAR_END_OF_TOKEN_MARKER  ' '
+#define	GRAMMAR_END_OF_TOKEN_MARKER  " "
 #endif
 
 #ifndef GRAMMAR_END_OF_TOKEN_MARKER_SIZE
